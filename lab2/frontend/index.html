@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин Лимонадов</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 250px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .color-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 2px solid #eee;
+        }
+        .card h2 {
+            margin: 10px 0;
+            color: #222;
+        }
+        .card p {
+            color: #666;
+            font-size: 14px;
+            min-height: 40px;
+        }
+        .price {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2e8b57;
+            margin-top: 15px;
+        }
+        #loading {
+            color: #888;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍋 Наши Лимонады 🍋</h1>
+    <div id="loading">Загрузка меню с бэкенда...</div>
+    <div class="container" id="lemonade-list">
+        <!-- Сюда будут вставляться карточки через JavaScript -->
+    </div>
+
+    <script>
+        // Эта функция запускается при загрузке страницы
+        async function loadLemonades() {
+            try {
+                // Обращаемся к нашему бэкенду (порт 5000)
+                const response = await fetch('http://127.0.0.1:5000/api/lemonades');
+                const lemonades = await response.json();
+                
+                // Скрываем надпись "Загрузка..."
+                document.getElementById('loading').style.display = 'none';
+                
+                const container = document.getElementById('lemonade-list');
+
+                // Для каждого лимонада создаем HTML-карточку
+                lemonades.forEach(lemonade => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="color-circle" style="background-color: ${lemonade.color}"></div>
+                        <h2>${lemonade.name}</h2>
+                        <p>${lemonade.description}</p>
+                        <div class="price">${lemonade.price} руб.</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                document.getElementById('loading').innerText = "Ошибка: Бэкенд не отвечает :(";
+                console.error("Ошибка получения данных:", error);
+            }
+        }
+
+        // Запускаем загрузку
+        loadLemonades();
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+---
+- name: Deploy application to KVM VM
+  hosts: kvm_vm
+  become: yes
+  vars:
+    app_dir: /home/maria/lab2
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add maria to docker group
+      user:
+        name: maria
+        groups: docker
+        append: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: maria
+        group: maria
+        mode: '0755'
+
+    - name: Copy application files
+      copy:
+        src: /home/maria/lab2/
+        dest: "{{ app_dir }}/"
+        owner: maria
+        group: maria
+        mode: preserve
+
+    - name: Run docker compose up
+      command: docker compose up -d --build
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: maria
